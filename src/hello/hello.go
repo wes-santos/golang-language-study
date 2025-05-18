@@ -4,7 +4,11 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 )
+
+const timesToMonitoring = 1
+const delayBetweenMonitorings = 5 * time.Second
 
 func readCommand() int {
 	var command int
@@ -24,22 +28,31 @@ func showOptions() {
 	fmt.Println("0- Exit program")
 }
 
+func checkWebsite(site string) {
+	response, _ := http.Get(site)
+	switch response.StatusCode {
+	case http.StatusOK:
+		fmt.Println("The website", site, "is OK.")
+	case http.StatusNotFound:
+		fmt.Println("The website", site, "is returning a 404 status.")
+	default:
+		fmt.Println("Returned status by website not mapped. Value eturned:", response.StatusCode)
+	}
+}
+
 func startMonitoring() {
 	fmt.Println("Monitoring")
 	sites := [2]string{"https://httpbin.org/status/404", "https://alura.com.br"}
 
-	for _, site := range sites {
-		response, _ := http.Get(site)
-		switch response.StatusCode {
-		case http.StatusOK:
-			fmt.Println("The website", site, "is OK.")
-		case http.StatusNotFound:
-			fmt.Println("The website", site, "is returning a 404 status.")
-		default:
-			fmt.Println("Returned status by website not mapped. Value eturned:", response.StatusCode)
+	for i := 0; i < timesToMonitoring; i++ {
+		for _, site := range sites {
+			checkWebsite(site)
+		}
+
+		if i > 0 {
+			time.Sleep(delayBetweenMonitorings)
 		}
 	}
-
 }
 
 func main() {
