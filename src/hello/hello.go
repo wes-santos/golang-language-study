@@ -28,8 +28,7 @@ func startMonitoring() {
 	fmt.Println("Monitoring")
 	sites := [2]string{"https://httpbin.org/status/404", "https://alura.com.br"}
 
-	for idx, site := range sites {
-		fmt.Println("Monitoring site number", idx)
+	for _, site := range sites {
 		response, _ := http.Get(site)
 		switch response.StatusCode {
 		case http.StatusOK:
