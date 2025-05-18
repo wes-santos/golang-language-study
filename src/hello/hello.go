@@ -26,17 +26,21 @@ func showOptions() {
 
 func startMonitoring() {
 	fmt.Println("Monitoring")
-	site := "https://httpbin.org/status/404"
-	response, _ := http.Get(site)
+	sites := [2]string{"https://httpbin.org/status/404", "https://alura.com.br"}
 
-	switch response.StatusCode {
-	case http.StatusOK:
-		fmt.Println("The website", site, "is OK.")
-	case http.StatusNotFound:
-		fmt.Println("The website", site, "is returning a 404 status.")
-	default:
-		fmt.Println("Returned status by website not mapped. Value eturned:", response.StatusCode)
+	for idx, site := range sites {
+		fmt.Println("Monitoring site number", idx)
+		response, _ := http.Get(site)
+		switch response.StatusCode {
+		case http.StatusOK:
+			fmt.Println("The website", site, "is OK.")
+		case http.StatusNotFound:
+			fmt.Println("The website", site, "is returning a 404 status.")
+		default:
+			fmt.Println("Returned status by website not mapped. Value eturned:", response.StatusCode)
+		}
 	}
+
 }
 
 func main() {
