@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -28,25 +31,61 @@ func showOptions() {
 	fmt.Println("0- Exit program")
 }
 
-func checkWebsite(site string) {
-	response, _ := http.Get(site)
+func checkWebsite(site string) error {
+	response, err := http.Get(site)
+	if err != nil {
+		return err
+	}
 	switch response.StatusCode {
 	case http.StatusOK:
 		fmt.Println("The website", site, "is OK.")
 	case http.StatusNotFound:
 		fmt.Println("The website", site, "is returning a 404 status.")
 	default:
-		fmt.Println("Returned status by website not mapped. Value eturned:", response.StatusCode)
+		fmt.Println("Returned status by website not mapped. Value returned:", response.StatusCode)
 	}
+	return nil
+}
+
+func readWebsitesFromTextFile() ([]string, error) {
+	var websites []string
+
+	file, err := os.Open("src/hello/websites.txt")
+	defer file.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	reader := bufio.NewReader(file)
+	for {
+		line, err := reader.ReadString('\n')
+		line = strings.TrimSpace(line)
+
+		websites = append(websites, line)
+
+		if err == io.EOF {
+			fmt.Println("File readed.")
+			break
+		}
+	}
+
+	return websites, nil
 }
 
 func startMonitoring() {
 	fmt.Println("Monitoring")
-	sites := [2]string{"https://httpbin.org/status/404", "https://alura.com.br"}
+
+	sites, err := readWebsitesFromTextFile()
+	if err != nil {
+		fmt.Printf("Error opening websites.txt file: %v", err)
+	}
 
 	for i := 0; i < timesToMonitoring; i++ {
 		for _, site := range sites {
-			checkWebsite(site)
+			err := checkWebsite(site)
+			if err != nil {
+				fmt.Printf("Error requesting site %s. Error: %v ", site, err)
+			}
 		}
 
 		if i > 0 {
@@ -58,16 +97,6 @@ func startMonitoring() {
 func main() {
 	showIntroduction()
 	showOptions()
-
-	// if command == 1 {
-	// 	fmt.Println("Monitoring...")
-	// } else if command == 2 {
-	// 	fmt.Println("Logging...")
-	// } else if command == 0 {
-	// 	fmt.Println("Exiting program. Bye.")
-	// } else {
-	// 	fmt.Println("Command unrecognized.")
-	// }
 
 	command := readCommand()
 
