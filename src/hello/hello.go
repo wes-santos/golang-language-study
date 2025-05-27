@@ -25,6 +25,7 @@ func main() {
 		startMonitoring()
 	case 2:
 		fmt.Println("Logging...")
+		printLogsFromFile()
 	case 3:
 		fmt.Println("Exiting program. Bye.")
 		os.Exit(0)
@@ -140,6 +141,17 @@ func saveLogsToFile(site string, status bool) error {
 			strconv.FormatBool(status),
 		),
 	)
+
+	return nil
+}
+
+func printLogsFromFile() error {
+	file, err := os.ReadFile("src/logs.txt")
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(string(file))
 
 	return nil
 }
