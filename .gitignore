@@ -26,3 +26,5 @@ go.work.sum
 
 # local folder with temp files
 temp
+
+src/logs.txt
