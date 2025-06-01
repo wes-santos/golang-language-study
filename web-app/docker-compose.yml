@@ -1,0 +1,11 @@
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: alura_store
+    ports:
+      - "5432:5432"
+
