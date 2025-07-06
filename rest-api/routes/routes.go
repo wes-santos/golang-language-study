@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/wes-santos/rest-api/controllers"
 	"github.com/wes-santos/rest-api/middlewares"
@@ -22,5 +23,5 @@ func HandleRequest() {
 
 	r.HandleFunc("/api/personalities/{id}", controllers.UpdatePersonality).Methods("Put")
 
-	log.Fatal(http.ListenAndServe(":8000", r))
+	log.Fatal(http.ListenAndServe(":8000", handlers.CORS(handlers.AllowedOrigins([]string{"*"}))(r)))
 }
