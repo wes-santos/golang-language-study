@@ -20,13 +20,13 @@ func Greetings(c *gin.Context) {
 	name, founded := c.Params.Get("name")
 	if !founded {
 		c.JSON(200, gin.H{
-			"API says:": "He, what's up? Sorry, I can't get your name from URL.",
+			"API says:": "Hey, what's up? Sorry, I can't get your name from URL.",
 		})
 		return
 	}
 
 	c.JSON(200, gin.H{
-		"API says:": "Hey" + name + ", how you doing?",
+		"API says": "Hey, " + name + ", how you doing?",
 	})
 }
 
