@@ -11,11 +11,29 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/wes-santos/gin-rest-api/controllers"
 	"github.com/wes-santos/gin-rest-api/database"
+	"github.com/wes-santos/gin-rest-api/models"
 )
 
+var ID int
+
 func SetupTestRoutes() *gin.Engine {
+	gin.SetMode(gin.ReleaseMode)
 	routes := gin.Default()
 	return routes
+}
+
+func CreateStudentMock() {
+	student := models.Student{Name: "Student Mock Name", CPF: "12345678901", RG: "123456789"}
+
+	database.DB.Create(&student)
+	ID = int(student.ID)
+}
+
+func DeleteStudentMock() {
+	var student models.Student
+
+	database.DB.Delete(&student, ID)
+
 }
 
 func TestCheckGreetingEndpointStatusCodeWithParam(t *testing.T) {
@@ -52,6 +70,8 @@ func TestCheckGreetingEndpointBodyWithParam(t *testing.T) {
 
 func TestListAllStudentsHandler(t *testing.T) {
 	database.ConnectWithDatabase()
+	CreateStudentMock()
+	defer DeleteStudentMock()
 
 	r := SetupTestRoutes()
 	r.GET("/students", controllers.GetAllStudents)
@@ -59,6 +79,21 @@ func TestListAllStudentsHandler(t *testing.T) {
 	req, err := http.NewRequest("GET", "/students", nil)
 	assert.Nil(t, err)
 
+	res := httptest.NewRecorder()
+	r.ServeHTTP(res, req)
+
+	assert.Equal(t, http.StatusOK, res.Code)
+}
+
+func TestGetStudentByCPFHandle(t *testing.T) {
+	database.ConnectWithDatabase()
+	CreateStudentMock()
+	defer DeleteStudentMock()
+
+	r := SetupTestRoutes()
+	r.GET("/students/cpf/:cpf", controllers.GetStudentByCPF)
+	req, err := http.NewRequest("GET", "/students/cpf/12345678901", nil)
+	assert.Nil(t, err)
 	res := httptest.NewRecorder()
 	r.ServeHTTP(res, req)
 
