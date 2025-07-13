@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/wes-santos/gin-rest-api/controllers"
+	"github.com/wes-santos/gin-rest-api/database"
 )
 
 func SetupTestRoutes() *gin.Engine {
@@ -22,11 +23,11 @@ func TestCheckGreetingEndpointStatusCodeWithParam(t *testing.T) {
 
 	r.GET("/:name", controllers.Greetings)
 	req, _ := http.NewRequest("GET", "/wes", nil)
-	resp := httptest.NewRecorder()
+	res := httptest.NewRecorder()
 
-	r.ServeHTTP(resp, req)
+	r.ServeHTTP(res, req)
 
-	assert.Equal(t, http.StatusOK, resp.Code, "Retrivied status code is different from 200")
+	assert.Equal(t, http.StatusOK, res.Code, "Retrivied status code is different from 200")
 }
 
 func TestCheckGreetingEndpointBodyWithParam(t *testing.T) {
@@ -37,14 +38,29 @@ func TestCheckGreetingEndpointBodyWithParam(t *testing.T) {
 	reqName := "wes"
 
 	req, _ := http.NewRequest("GET", "/"+reqName, nil)
-	resp := httptest.NewRecorder()
+	res := httptest.NewRecorder()
 
-	r.ServeHTTP(resp, req)
+	r.ServeHTTP(res, req)
 
-	mockResp := fmt.Sprintf(`{"API says":"Hey, %s, how you doing?"}`, reqName)
+	mockRes := fmt.Sprintf(`{"API says":"Hey, %s, how you doing?"}`, reqName)
 
-	respBody, err := io.ReadAll(resp.Body)
+	respBody, err := io.ReadAll(res.Body)
 	assert.Nil(t, err)
 
-	assert.Equal(t, mockResp, string(respBody))
+	assert.Equal(t, mockRes, string(respBody))
+}
+
+func TestListAllStudentsHandler(t *testing.T) {
+	database.ConnectWithDatabase()
+
+	r := SetupTestRoutes()
+	r.GET("/students", controllers.GetAllStudents)
+
+	req, err := http.NewRequest("GET", "/students", nil)
+	assert.Nil(t, err)
+
+	res := httptest.NewRecorder()
+	r.ServeHTTP(res, req)
+
+	assert.Equal(t, http.StatusOK, res.Code)
 }
