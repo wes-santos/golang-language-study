@@ -126,3 +126,19 @@ func TestGetStudentByIDHandler(t *testing.T) {
 	assert.Equal(t, "123456789", mockStudent.RG)
 	assert.Equal(t, http.StatusOK, res.Code)
 }
+
+func TestDeleteStudentHandler(t *testing.T) {
+	database.ConnectWithDatabase()
+	CreateStudentMock()
+
+	r := SetupTestRoutes()
+	r.DELETE("/students/:id", controllers.DeleteStudent)
+	endpointPath := "/students/" + strconv.Itoa(ID)
+	req, err := http.NewRequest("DELETE", endpointPath, nil)
+	assert.Nil(t, err)
+
+	res := httptest.NewRecorder()
+	r.ServeHTTP(res, req)
+
+	assert.Equal(t, http.StatusNoContent, res.Code)
+}
