@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -141,4 +142,36 @@ func TestDeleteStudentHandler(t *testing.T) {
 	r.ServeHTTP(res, req)
 
 	assert.Equal(t, http.StatusNoContent, res.Code)
+}
+
+func TestUpdateStudentHandler(t *testing.T) {
+	database.ConnectWithDatabase()
+	CreateStudentMock()
+	defer DeleteStudentMock()
+
+	r := SetupTestRoutes()
+	r.PUT("/students/:id", controllers.UpdateStudent)
+
+	student := models.Student{Name: "Student Mock Test", CPF: "47123456789", RG: "123456700"}
+
+	jsonStudent, err := json.Marshal(student)
+	assert.Nil(t, err)
+
+	updateStudentPath := "/students/" + strconv.Itoa(ID)
+	req, err := http.NewRequest("PUT", updateStudentPath, bytes.NewBuffer(jsonStudent))
+	assert.Nil(t, err)
+
+	res := httptest.NewRecorder()
+	r.ServeHTTP(res, req)
+
+	assert.Equal(t, http.StatusAccepted, res.Code)
+
+	var updatedStudentMock models.Student
+	err = json.Unmarshal(res.Body.Bytes(), &updatedStudentMock)
+	fmt.Println(updatedStudentMock)
+	assert.Nil(t, err)
+
+	assert.Equal(t, "47123456789", updatedStudentMock.CPF)
+	assert.Equal(t, "123456700", updatedStudentMock.RG)
+	assert.Equal(t, "Student Mock Test", updatedStudentMock.Name)
 }
