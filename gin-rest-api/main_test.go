@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -85,7 +87,7 @@ func TestListAllStudentsHandler(t *testing.T) {
 	assert.Equal(t, http.StatusOK, res.Code)
 }
 
-func TestGetStudentByCPFHandle(t *testing.T) {
+func TestGetStudentByCPFHandler(t *testing.T) {
 	database.ConnectWithDatabase()
 	CreateStudentMock()
 	defer DeleteStudentMock()
@@ -97,5 +99,30 @@ func TestGetStudentByCPFHandle(t *testing.T) {
 	res := httptest.NewRecorder()
 	r.ServeHTTP(res, req)
 
+	assert.Equal(t, http.StatusOK, res.Code)
+}
+
+func TestGetStudentByIDHandler(t *testing.T) {
+	database.ConnectWithDatabase()
+	CreateStudentMock()
+	defer DeleteStudentMock()
+
+	r := SetupTestRoutes()
+	r.GET("/students/:id", controllers.GetStudentById)
+	endpointPath := "/students/" + strconv.Itoa(ID)
+
+	req, err := http.NewRequest("GET", endpointPath, nil)
+	assert.Nil(t, err)
+
+	res := httptest.NewRecorder()
+	r.ServeHTTP(res, req)
+
+	var mockStudent models.Student
+	err = json.Unmarshal(res.Body.Bytes(), &mockStudent)
+	assert.Nil(t, err)
+
+	assert.Equal(t, "Student Mock Name", mockStudent.Name)
+	assert.Equal(t, "12345678901", mockStudent.CPF)
+	assert.Equal(t, "123456789", mockStudent.RG)
 	assert.Equal(t, http.StatusOK, res.Code)
 }
