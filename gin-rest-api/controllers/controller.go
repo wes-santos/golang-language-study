@@ -122,7 +122,11 @@ func GetStudentByCPF(c *gin.Context) {
 }
 
 func ShowIndexPage(c *gin.Context) {
+	var students []models.Student
+
+	database.DB.Find(&students)
+
 	c.HTML(http.StatusOK, "index.html", gin.H{
-		"message": "Welcome!",
+		"students": students,
 	})
 }
